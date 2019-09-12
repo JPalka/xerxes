@@ -1,6 +1,9 @@
 #include "storage.h"
 
 #include <misc/utils.h>
+#include <game/game.h>
+
+#include <exceptions/insufficentresources.h>
 
 Storage::Storage (std::string xmlData, WorldSettings *worldSettings) : Building ( xmlData, worldSettings ) {
 	//setting default storage. AFAIK 3k of each resource, verify.
@@ -25,24 +28,31 @@ Resources Storage::getCapacity () {
 	return result;
 }
 
-Storage &Storage::operator+ ( const Resources &rhs ) {
-	this->storage = this->storage + rhs;
-	return *this;
-}
-
 Storage &Storage::addResources ( const Resources &rhs ) {
 	this->storage = this->storage + rhs;
+	//if resources in storage exceed max then set to max
+	Resources max {this->getCapacity ()};
+	if ( this->storage.wood > max.wood ) {
+		this->storage.wood = max.wood;
+	}
+	if ( this->storage.stone > max.stone ) {
+		this->storage.stone = max.stone;
+	}
+	if ( this->storage.iron > max.iron ) {
+		this->storage.iron = max.iron;
+	}
 	return *this;
 }
 
-Storage &Storage::operator- ( const Resources &rhs ) {
+Storage &Storage::substractResources ( const Resources &rhs ) {
 	if ( this->storage >= rhs ) {
 		this->storage = this->storage - rhs;
 		return *this;
 	}
-	std::cout << "Storage cannot go into negatives" << std::endl;
-	throw "ding";
+	Game::logCallback ( "Storage cannot go into negatives\n" );
+	throw InsufficentResources();
 }
+
 std::string Storage::getUrlSlug () {
 	return "&screen=storage";
 }

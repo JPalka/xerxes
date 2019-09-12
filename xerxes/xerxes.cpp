@@ -8,6 +8,7 @@
 #include <thread>
 #include <exceptions/wrongcredentials.h>
 #include <exceptions/worldinactive.h>
+#include <exceptions/insufficentresources.h>
 
 Xerxes::Xerxes() {
 	this->logFile.open ("xerxes.log");
@@ -81,13 +82,23 @@ void Xerxes::runBword() {
 	std::vector <Village*> villages = this->gameInstance->currentWorld->findVillages ( *player );
 	std::vector<std::pair<std::string, int>> scavengeParty;
 	scavengeParty.push_back ( std::make_pair("spear", 100) );
+	Storage &storageRef = static_cast<Storage&> (villages[0]->getBuilding ("storage"));
 	while ( !this->stopSignal ) {
-		sleep(2);
+		sleep(5);
 		this->gameInstance->currentWorld->refresh ();
-		//Just keep building one spear dude
-		if ( villages[0]->getBuilding ("barracks").getOrders(villages[0]->getBuilding ("barracks")).empty() ) {
-			static_cast<Barracks&> (villages[0]->getBuilding ("barracks")).recruitUnit ( "spear", 1 );
+		Resources res { 2000, 2000, 2000 };
+		try {
+			storageRef.substractResources ( res );
+			this->logString ( "Substracted 2k of resources\n" );
 		}
+		catch ( InsufficentResources &ex ) {
+			this->logString ( "Not enough resources\n" );
+		}
+
+		//Just keep building one spear dude
+//		if ( villages[0]->getBuilding ("barracks").getOrders(villages[0]->getBuilding ("barracks")).empty() ) {
+//			static_cast<Barracks&> (villages[0]->getBuilding ("barracks")).recruitUnit ( "spear", 1 );
+//		}
 //		try {
 //			static_cast<Place&> (villages[0]->getBuilding ("place")).scavengingModule.sendScavengeParty ( scavengeParty, 1);
 //		}

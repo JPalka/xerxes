@@ -12,11 +12,10 @@ class Storage : public Building
 		virtual std::string getUrlSlug () override;
 		Resources getCapacity();
 		Resources getStorage();
-		Storage &operator+ ( const Resources &rhs );
-		Storage &operator- ( const Resources &rhs );
 		virtual Storage &parseData ( std::string ) override;
 		virtual std::unique_ptr<Building> clone () override;
 		Storage &addResources(const Resources &rhs);
+		Storage &substractResources(const Resources &rhs);
 };
 
 #endif // STORAGE_H

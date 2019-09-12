@@ -159,4 +159,5 @@ HEADERS += \
     exceptions/wrongcredentials.h \
     exceptions/worldinactive.h \
     game/orderprocessor.h \
-    exceptions/insufficentunits.h
+    exceptions/insufficentunits.h \
+    exceptions/insufficentresources.h
