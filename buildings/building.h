@@ -45,7 +45,7 @@ class Building {
 		virtual std::unique_ptr<Building> clone ();
 		Building ( std::string xmlData, WorldSettings *worldSettings );
 		Building () = default;
-		Resources getUpgradeCost();
+		Resources getUpgradeCost ();
 		int getUpgradePopulationCost (); // Gets population needed to upgrade building
 		int getPopulation ( int levelOffset = 0 ); // Gets population used by the building
 		int getUpgradeTime ( int headquartersLevel );
@@ -54,7 +54,10 @@ class Building {
 		virtual Building &setLevel ( int newLevel );
 		virtual Building &parseData ( std::string htmlData );
 		virtual std::string toString ();
+		// Returns building level including lvl under construction
+		int getLevel ( bool includePending = false );
 		Building(const Building &source);
+		bool operator== ( const Building &rhs );
 		int lastUpdated;
 };
 

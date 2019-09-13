@@ -13,7 +13,8 @@ class Headquarters : public Building {
 		virtual std::string getUrlSlug() override;
 		virtual std::unique_ptr<Building> clone () override;
 		virtual Headquarters &parseData ( std::string ) override;
-//		virtual std::string toString() override;
+		std::vector<Building *> getConstructedBuildings ();
+		virtual std::string toString() override;
 		bool queueFull ();
 		bool upgradeBuilding ( std::string buildingName );
 };

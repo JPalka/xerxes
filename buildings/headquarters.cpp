@@ -78,7 +78,6 @@ Headquarters &Headquarters::parseData ( std::string htmlData ) {
 		}
 		//Now create BuildOrder
 		std::unique_ptr<BuildOrder> order ( new BuildOrder ( this->parentVillage->getBuilding (buildingName), *this ) );
-//		order->newLevel = levelConstructed;
 		order->dueTime = timestamp;
 		order->id = orderId;
 		order->text = "Building " + buildingName;
@@ -92,6 +91,25 @@ Headquarters &Headquarters::parseData ( std::string htmlData ) {
 		this->addOrder ( std::move ( bo ) );
 	}
 	return *this;
+}
+
+std::vector<Building*> Headquarters::getConstructedBuildings() {
+	std::vector<Building*> result;
+	std::vector<Order*> orders = this->getOrders (*this);
+	for ( Order *order : orders ) {
+		result.push_back ( &static_cast<BuildOrder*>(order)->target );
+	}
+	return result;
+}
+
+std::string Headquarters::toString() {
+	std::string result = Building::toString ();
+	//Temp deboog
+//	for ( Building *building : this->getConstructedBuildings () ) {
+//		result += std::to_string ( (long)building ) + " ";
+//	}
+//	result += '\n';
+	return result;
 }
 
 bool Headquarters::queueFull() {

@@ -7,6 +7,7 @@
 #include <orders/scavengeorder.h>
 #include "buildings/storage.h"
 #include "buildings/farm.h"
+#include "buildings/headquarters.h"
 
 Building::Building (std::string xmlData , WorldSettings *worldSettings) : worldSettings(worldSettings) {
 	xmlpp::DomParser parser;
@@ -78,11 +79,25 @@ Building::Building ( const Building &source ) {
 	this->parentVillage = source.parentVillage;
 	this->lastUpdated = source.lastUpdated;
 }
+//Buildings are considered the same if their name and parent village id is the same
+bool Building::operator== ( const Building &rhs ) {
+	if ( this->name != rhs.name ) {
+		return false;
+	}
+	if ( this->parentVillage->id != rhs.parentVillage->id ) {
+		return false;
+	}
+	return true;
+}
 
 std::string Building::toString() {
 	std::string result = "";
 	result += this->name + "\n";
-	result += "Level: " + std::to_string (this->level) + "/" + std::to_string (this->maxLevel) + "\n";
+	result += "Level: " + std::to_string (this->getLevel());
+	if ( this->getLevel (true) - this->getLevel () > 0 ) {
+		result += "+" + std::to_string (this->getLevel(true) - this->getLevel());
+	}
+	result += "/" + std::to_string (this->maxLevel) + "\n";
 	result += "Population used: " + std::to_string (this->getPopulation ()) + "\n";
 	result += "Upgrade pop cost: " + std::to_string (this->getUpgradePopulationCost ()) + "\n";
 	result += "Upgrade cost: " + this->getUpgradeCost ().toString () + "\n";
@@ -95,6 +110,20 @@ std::string Building::toString() {
 	}
 
 	return result;
+}
+
+int Building::getLevel ( bool includePending ) {
+	if ( !includePending ) {
+		return this->level;
+	}
+	int constructedLevels = 0;
+	Headquarters &hq = static_cast<Headquarters&> (this->parentVillage->getBuilding ("main"));
+	for ( Building *building : hq.getConstructedBuildings () ) {
+		if ( *building == *this ) {
+			constructedLevels++;
+		}
+	}
+	return this->level + constructedLevels;
 }
 //Base clone method
 std::unique_ptr<Building> Building::clone () {
@@ -120,9 +149,9 @@ std::unique_ptr<Building> Building::clone () {
 //Get building upgrade cost
 Resources Building::getUpgradeCost () {
 	Resources result;
-	result.wood = std::round ( this->baseCost.wood * std::pow ( this->woodFactor, this->level ) );
-	result.stone = std::round ( this->baseCost.stone * std::pow ( this->stoneFactor, this->level ) );
-	result.iron = std::round ( this->baseCost.iron * std::pow ( this->ironFactor, this->level ) );
+	result.wood = std::round ( this->baseCost.wood * std::pow ( this->woodFactor, this->getLevel (true) ) );
+	result.stone = std::round ( this->baseCost.stone * std::pow ( this->stoneFactor, this->getLevel (true) ) );
+	result.iron = std::round ( this->baseCost.iron * std::pow ( this->ironFactor, this->getLevel (true) ) );
 	return result;
 }
 
@@ -130,7 +159,7 @@ int Building::getUpgradePopulationCost() {
 	return this->getPopulation (1) - this->getPopulation ();
 }
 int Building::getPopulation ( int levelOffset ) {
-	int buildingLevel = this->level + levelOffset;
+	int buildingLevel = this->getLevel (true) + levelOffset;
 	if ( buildingLevel == 0 ) {
 		return 0;
 	}
@@ -152,8 +181,8 @@ int Building::getUpgradeTime ( int headquartersLevel = 1 ) {
 }
 
 bool Building::canUpgrade() {
-	//false if max level already reached
-	if ( this->level >= this->maxLevel ) {
+	//false if max level already reached or if last level is under construction already
+	if ( this->getLevel (true) >= this->maxLevel ) {
 		return false;
 	}
 	//Check if there are enough resources in storage
