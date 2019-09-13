@@ -59,13 +59,11 @@ Barracks &Barracks::parseData ( std::string htmlData ) {
 		//Get all text nodes of first table row cell...kill me.
 		xmlpp::Node::NodeList textNodes = dynamic_cast<xmlpp::Element*> ( *currentCellIterator )->get_children ( "text" );
 		std::string textNumber = dynamic_cast<xmlpp::TextNode*>(*(textNodes.rbegin ()))->get_content ();
-//		std::cout << textNumber << std::endl;
 		std::regex regUnitCount ( "(\\d+)" );
 		std::smatch matchUnitCount;
 		int constructedUnitCount = 0;
 		if ( std::regex_search ( textNumber, matchUnitCount, regUnitCount ) ) {
 			constructedUnitCount = std::stoi ( matchUnitCount.str() );
-//			std::cout << "constructed unit count: " << constructedUnitCount << std::endl;
 		}
 		else {
 			std::cout << "Cannot match unit count." << std::endl;
@@ -74,12 +72,10 @@ Barracks &Barracks::parseData ( std::string htmlData ) {
 		currentCellIterator++; //skip duration (3rd) cell
 		//Now get completion date
 		currentCellIterator++;
-//		std::cout << dynamic_cast<xmlpp::Element*> ( *currentCellIterator )->get_first_child_text ()->get_content () << "\n";
 		std::string dueDate = dynamic_cast<xmlpp::Element*> ( *currentCellIterator )->get_first_child_text ()->get_content ();
 		long int timestamp = 0;
 		// Now converting this stupid date format into timestamp
 		timestamp = Utils::decodeBuildDate ( dueDate );
-//		std::cout << "Due date: " << timestamp << std::endl;
 		//Get cancellation link slug and extract info from it
 		currentCellIterator++;
 		xmlpp::Element *aTag = dynamic_cast<xmlpp::Element*> ( (*currentCellIterator)->get_first_child ( "a" ) );

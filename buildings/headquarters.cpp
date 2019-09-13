@@ -27,34 +27,12 @@ Headquarters &Headquarters::parseData ( std::string htmlData ) {
 	xmlpp::Element* root = new xmlpp::Element(r);
 	Glib::ustring xpath = "//tbody[@id=\"buildqueue\"]/tr[contains(@class,\"buildorder\")]";
 	xmlpp::Node::NodeSet rows = root->find ( xpath );
-	std::vector<std::unique_ptr<BuildOrder>> buildQueueParsed;
 	for ( size_t i = 0; i < rows.size (); i++ ) {
 		xmlpp::Node::NodeList cells = rows[i]->get_children ( Glib::ustring ( "td" ) );
 		std::string buildingName = dynamic_cast<xmlpp::Element*> (rows[i])->get_attribute_value ( "class" );
-		std::regex reg ( "buildorder_.*" );
-		std::regex remove ( "buildorder_" );
 		std::smatch match;
-		std::regex_search ( buildingName, match, reg );
-		buildingName = std::regex_replace ( match[0].str(), remove, "" );
-		//Cell with name and level of constructed building. Extracting only level of building being constructed
-		xmlpp::Node *nameCell = *cells.begin();
-		xmlpp::Node::NodeList nameCellChildren = nameCell->get_children ( Glib::ustring ( "text" ) );
-		int levelConstructed = 0;
-		for ( auto child: nameCellChildren ) {
-			Glib::ustring temp ( dynamic_cast<xmlpp::TextNode*> (child)->get_content() );
-			temp = g_ascii_strdown ( g_strstrip ( (gchar*)temp.data () ), -1 );
-			if ( temp.length () > 0 ) {
-				std::regex regLevel ( "level \\d*" );
-				std::regex removeLevel ( "level " );
-				std::smatch matchLevel;
-				std::string temp2 ( temp );
-				if ( std::regex_search ( temp2, matchLevel, regLevel ) ) {
-					std::string levelStr ( std::regex_replace ( matchLevel[0].str(), removeLevel, "" ) );
-					levelConstructed = std::stoi ( levelStr );
-					break;
-				}
-			}
-		}
+		std::regex_search ( buildingName, match, std::regex ( "buildorder_(.*)" ) );
+		buildingName = match.str(1);
 		// Cell with date when building is complete.
 		xmlpp::Node *dueTimeCell = *( ++++++cells.begin() ); //Im going to hell for this
 		std::string dueDate = dynamic_cast<xmlpp::Element*> ( dueTimeCell )->get_first_child_text ()->get_content ();
@@ -65,12 +43,10 @@ Headquarters &Headquarters::parseData ( std::string htmlData ) {
 		xmlpp::Node *cancelLinkCell = *( ++++++++cells.begin() ); //Living the meme #advancedc++++++++programming
 		xmlpp::Element *aTag = dynamic_cast<xmlpp::Element*> ( cancelLinkCell->get_first_child ( "a" ) );
 		std::string cancelLink = aTag->get_attribute_value ( "href" );
-		std::regex regId ( "id=\\d+" );
-		std::regex removeId ( "id=" );
 		std::smatch matchId;
 		int orderId;
-		if ( std::regex_search ( cancelLink, matchId, regId ) ) {
-			orderId = std::stoi ( std::regex_replace ( matchId[0].str(), removeId, "" ) );
+		if ( std::regex_search ( cancelLink, matchId, std::regex ( "id=(\\d+)" ) ) ) {
+			orderId = std::stoi ( matchId.str (1) );
 		}
 		else {
 			std::cout << "Couldnt extract order id from cancel link. Something is super wrong" << std::endl;
@@ -81,14 +57,7 @@ Headquarters &Headquarters::parseData ( std::string htmlData ) {
 		order->dueTime = timestamp;
 		order->id = orderId;
 		order->text = "Building " + buildingName;
-		buildQueueParsed.push_back ( std::move(order) );
-	}
-	if ( this->addOrder == nullptr ) {
-		std::cout << "addorder is nullptr gtfo." << std::endl;
-		throw "kek";
-	}
-	for ( auto &bo : buildQueueParsed ) {
-		this->addOrder ( std::move ( bo ) );
+		this->addOrder ( std::move(order) );
 	}
 	return *this;
 }
@@ -99,16 +68,12 @@ std::vector<Building*> Headquarters::getConstructedBuildings() {
 	for ( Order *order : orders ) {
 		result.push_back ( &static_cast<BuildOrder*>(order)->target );
 	}
+	result.shrink_to_fit ();
 	return result;
 }
 
 std::string Headquarters::toString() {
 	std::string result = Building::toString ();
-	//Temp deboog
-//	for ( Building *building : this->getConstructedBuildings () ) {
-//		result += std::to_string ( (long)building ) + " ";
-//	}
-//	result += '\n';
 	return result;
 }
 
@@ -129,7 +94,6 @@ bool Headquarters::upgradeBuilding ( std::string buildingName ) {
 	//Checking if building can be upgraded.
 	if ( !this->parentVillage->getBuilding ( buildingName ).canUpgrade () ) {
 		Game::logCallback ( "Cannot upgrade building: " + buildingName + '\n' );
-//		throw "INVALID OPERATION";
 		return false;
 	}
 	//Get upgrade cost. Need to do this BEFORE submitting build order
@@ -155,6 +119,7 @@ bool Headquarters::upgradeBuilding ( std::string buildingName ) {
 	order->dueTime = Utils::getTimestamp () + secondsComplete;
 	order->id = std::stoi ( newOrderId );
 	order->text = "Building " + buildingName;
+	order->cost = upgradeCost;
 	this->addOrder ( std::move ( order ) );
 	//Finally if everything went well deduce resources from parent village storage
 	Storage &store = static_cast<Storage&> ( this->parentVillage->getBuilding ("storage") );
