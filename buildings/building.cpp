@@ -5,6 +5,8 @@
 #include <orders/buildorder.h>
 #include <orders/recruitorder.h>
 #include <orders/scavengeorder.h>
+#include "buildings/storage.h"
+#include "buildings/farm.h"
 
 Building::Building (std::string xmlData , WorldSettings *worldSettings) : worldSettings(worldSettings) {
 	xmlpp::DomParser parser;
@@ -85,6 +87,7 @@ std::string Building::toString() {
 	result += "Upgrade pop cost: " + std::to_string (this->getUpgradePopulationCost ()) + "\n";
 	result += "Upgrade cost: " + this->getUpgradeCost ().toString () + "\n";
 	result += "Last updated: " + Utils::timestampToString ( this->lastUpdated ) + "\n";
+	result += "Can upgrade: " + (std::string)( this->canUpgrade () ? "true" : "false" ) + "\n";
 	result += "Url slug: " + this->getUrlSlug () + "\n";
 	std::vector<Order*> orders = this->getOrders ( *this );
 	for ( auto it = orders.rbegin (); it != orders.rend (); it++ ) {
@@ -146,6 +149,26 @@ int Building::getUpgradeTime ( int headquartersLevel = 1 ) {
 	result = this->buildTime * std::pow ( this->buildTimeFactor, this->level );
 	result = std::round ( result * std::pow ( 1.05, headquartersLevel * -1 ) );
 	return result;
+}
+
+bool Building::canUpgrade() {
+	//false if max level already reached
+	if ( this->level >= this->maxLevel ) {
+		return false;
+	}
+	//Check if there are enough resources in storage
+	Storage &store = static_cast<Storage&> (this->parentVillage->getBuilding ("storage"));
+	if ( this->getUpgradeCost () > store.getStorage () ) {
+		return false;
+	}
+	//Check population cap
+	Farm &farm = static_cast<Farm&> (this->parentVillage->getBuilding ("farm"));
+	int freePopulation = farm.getMaxPopulation () - farm.getCurrentPopulation ();
+	if ( this->getUpgradePopulationCost () > freePopulation ) {
+		return false;
+	}
+	//TODO check technology and building prerequisites
+	return true;
 }
 
 std::string Building::getUrlSlug () {

@@ -18,6 +18,7 @@
 #include <libxml++/libxml++.h>
 #include <libxml2/libxml/tree.h>
 #include <libxml2/libxml/HTMLparser.h>
+
 class Order;
 class WorldSettings;
 class Village;
@@ -27,6 +28,7 @@ class Building {
 		std::function<bool(std::unique_ptr<Order>)> addOrder;
 		std::function<std::vector<Order*>(Building&)> getOrders;
 		WorldSettings *worldSettings; // Needed to know world speed/other BS thats depending on world the building is in
+		Village *parentVillage;
 		int level;
 		int maxLevel;
 		int minLevel;
@@ -47,12 +49,12 @@ class Building {
 		int getUpgradePopulationCost (); // Gets population needed to upgrade building
 		int getPopulation ( int levelOffset = 0 ); // Gets population used by the building
 		int getUpgradeTime ( int headquartersLevel );
+		virtual bool canUpgrade (); // Check if building can be upgraded
 		virtual std::string getUrlSlug ( ) ;
 		virtual Building &setLevel ( int newLevel );
 		virtual Building &parseData ( std::string htmlData );
 		virtual std::string toString ();
 		Building(const Building &source);
-		Village *parentVillage;
 		int lastUpdated;
 };
 

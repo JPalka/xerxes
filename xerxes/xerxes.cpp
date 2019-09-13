@@ -86,42 +86,14 @@ void Xerxes::runBword() {
 	while ( !this->stopSignal ) {
 		sleep(5);
 		this->gameInstance->currentWorld->refresh ();
-		Resources res { 2000, 2000, 2000 };
-		try {
-			storageRef.substractResources ( res );
-			this->logString ( "Substracted 2k of resources\n" );
-		}
-		catch ( InsufficentResources &ex ) {
-			this->logString ( "Not enough resources\n" );
-		}
-
-		//Just keep building one spear dude
-//		if ( villages[0]->getBuilding ("barracks").getOrders(villages[0]->getBuilding ("barracks")).empty() ) {
-//			static_cast<Barracks&> (villages[0]->getBuilding ("barracks")).recruitUnit ( "spear", 1 );
-//		}
+//		if ( villages[0]->getBuilding ("smith") )
+//		Resources res { 2000, 2000, 2000 };
 //		try {
-//			static_cast<Place&> (villages[0]->getBuilding ("place")).scavengingModule.sendScavengeParty ( scavengeParty, 1);
+//			storageRef.substractResources ( res );
+//			this->logString ( "Substracted 2k of resources\n" );
 //		}
-//		catch ( GameException &ex ) {
-//			this->logString ( ex.what () );
-//		}
-//		try {
-//			static_cast<Place&> (villages[0]->getBuilding ("place")).scavengingModule.sendScavengeParty ( scavengeParty, 2);
-//		}
-//		catch ( GameException &ex ) {
-//			this->logString ( ex.what () );
-//		}
-//		try {
-//			static_cast<Place&> (villages[0]->getBuilding ("place")).scavengingModule.sendScavengeParty ( scavengeParty, 3);
-//		}
-//		catch ( GameException &ex ) {
-//			this->logString ( ex.what () );
-//		}
-//		try {
-//			static_cast<Place&> (villages[0]->getBuilding ("place")).scavengingModule.sendScavengeParty ( scavengeParty, 4);
-//		}
-//		catch ( GameException &ex ) {
-//			this->logString ( ex.what () );
+//		catch ( InsufficentResources &ex ) {
+//			this->logString ( "Not enough resources\n" );
 //		}
 	}
 }

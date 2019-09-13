@@ -16,6 +16,7 @@ class Resources
 		Resources &operator+ ( const Resources &rhs );
 		bool operator== ( const Resources &rhs );
 		bool operator>= ( const Resources &rhs );
+		bool operator> ( const Resources &rhs );
 		Resources operator* ( long int rhs );
 		Resources();
 		Resources ( double wood, double stone, double iron ) ;

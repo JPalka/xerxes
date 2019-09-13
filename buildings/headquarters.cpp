@@ -142,7 +142,6 @@ bool Headquarters::upgradeBuilding ( std::string buildingName ) {
 		newOrderId = matchId.str (1);
 		searchStart = matchId.suffix().first;
 	}
-//	std::cout << newOrderId << std::endl;
 	std::unique_ptr<BuildOrder> order ( new BuildOrder ( this->parentVillage->getBuilding (buildingName), *this ) );
 	order->newLevel = ++this->parentVillage->getBuilding (buildingName).level;
 	order->dueTime = Utils::getTimestamp () + secondsComplete;

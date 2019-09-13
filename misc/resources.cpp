@@ -35,6 +35,19 @@ bool Resources::operator>= ( const Resources &rhs ) {
 	return true;
 }
 
+bool Resources::operator> ( const Resources &rhs ) {
+	if ( this->wood <= rhs.wood ) {
+		return false;
+	}
+	if ( this->stone <= rhs.stone ) {
+		return false;
+	}
+	if ( this->iron <= rhs.iron ) {
+		return false;
+	}
+	return true;
+}
+
 Resources Resources::operator* ( long rhs ) {
 	Resources result ( this->wood * rhs, this->stone * rhs, this->iron * rhs );
 	return result;
