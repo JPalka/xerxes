@@ -14,6 +14,7 @@ class Headquarters : public Building {
 		virtual std::unique_ptr<Building> clone () override;
 		virtual Headquarters &parseData ( std::string ) override;
 //		virtual std::string toString() override;
+		bool queueFull ();
 		bool upgradeBuilding ( std::string buildingName );
 };
 

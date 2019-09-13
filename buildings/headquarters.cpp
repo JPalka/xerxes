@@ -7,6 +7,8 @@
 #include <game/account.h>
 #include <game/worldsettings.h>
 
+#include <game/game.h>
+
 Headquarters::Headquarters (std::string xmlData, WorldSettings *worldSettings) : Building (xmlData, worldSettings) {
 
 }
@@ -34,7 +36,6 @@ Headquarters &Headquarters::parseData ( std::string htmlData ) {
 		std::smatch match;
 		std::regex_search ( buildingName, match, reg );
 		buildingName = std::regex_replace ( match[0].str(), remove, "" );
-//		std::cout << "name: " << buildingName << std::endl;
 		//Cell with name and level of constructed building. Extracting only level of building being constructed
 		xmlpp::Node *nameCell = *cells.begin();
 		xmlpp::Node::NodeList nameCellChildren = nameCell->get_children ( Glib::ustring ( "text" ) );
@@ -54,15 +55,12 @@ Headquarters &Headquarters::parseData ( std::string htmlData ) {
 				}
 			}
 		}
-//		std::cout << "level: " << levelConstructed << std::endl;
 		// Cell with date when building is complete.
 		xmlpp::Node *dueTimeCell = *( ++++++cells.begin() ); //Im going to hell for this
-//		std::cout << dynamic_cast<xmlpp::Element*> ( dueTimeCell )->get_first_child_text ()->get_content () << "\n";
 		std::string dueDate = dynamic_cast<xmlpp::Element*> ( dueTimeCell )->get_first_child_text ()->get_content ();
 		long int timestamp = 0;
 		// Now converting this stupid date format into timestamp
 		timestamp = Utils::decodeBuildDate ( dueDate );
-//		std::cout << "Due date: " << timestamp << std::endl;
 		//Cell with cancel link and id of construction order. Also contains id of village.
 		xmlpp::Node *cancelLinkCell = *( ++++++++cells.begin() ); //Living the meme #advancedc++++++++programming
 		xmlpp::Element *aTag = dynamic_cast<xmlpp::Element*> ( cancelLinkCell->get_first_child ( "a" ) );
@@ -78,20 +76,6 @@ Headquarters &Headquarters::parseData ( std::string htmlData ) {
 			std::cout << "Couldnt extract order id from cancel link. Something is super wrong" << std::endl;
 			throw "Yeet";
 		}
-//		std::regex regVillage ( "village=\\d+" );
-//		std::regex removeVillage ( "village=" );
-//		std::smatch matchVillage;
-//		int villageId;
-//		if ( std::regex_search ( cancelLink, matchVillage, regVillage ) ) {
-//			villageId = std::stoi ( std::regex_replace ( matchVillage[0].str(), removeVillage, "") );
-//		}
-//		else {
-//			std::cout << "Village id not found in cancel link. Throwing a fit" << std::endl;
-//			throw "fit";
-//		}
-//		std::cout << "Order id: " << orderId << std::endl;
-//		std::cout << "Village id: " << villageId << std::endl;
-
 		//Now create BuildOrder
 		std::unique_ptr<BuildOrder> order ( new BuildOrder ( this->parentVillage->getBuilding (buildingName), *this ) );
 		order->newLevel = levelConstructed;
@@ -101,7 +85,6 @@ Headquarters &Headquarters::parseData ( std::string htmlData ) {
 		order->text = "Building " + buildingName;
 		buildQueueParsed.push_back ( std::move(order) );
 	}
-
 	if ( this->addOrder == nullptr ) {
 		std::cout << "addorder is nullptr gtfo." << std::endl;
 		throw "kek";
@@ -112,18 +95,28 @@ Headquarters &Headquarters::parseData ( std::string htmlData ) {
 	return *this;
 }
 
-//std::string Headquarters::toString() {
-//	std::string result = Building::toString ();
-//	std::vector<Order*> orders = this->getOrders ( *this );
-//	for ( auto it = orders.rbegin (); it != orders.rend (); it++ ) {
-//		result += (*it)->text + " - " + Utils::timestampToString ( (*it)->dueTime ) + "\n";
-//	}
-//	return result;
-//}
+bool Headquarters::queueFull() {
+	size_t maxQueueSize = 2; // Default maximum queue size
+	if ( this->getOrders (*this).size() >= maxQueueSize ) {
+		return true;
+	}
+	return false;
+}
 
 bool Headquarters::upgradeBuilding ( std::string buildingName ) {
-	//TODO: check if building can be upgraded at all
-
+	//Check if building queue is full
+	if ( this->queueFull () ) {
+		Game::logCallback ( "Building queue is full.\n" );
+		return false;
+	}
+	//Checking if building can be upgraded.
+	if ( !this->parentVillage->getBuilding ( buildingName ).canUpgrade () ) {
+		Game::logCallback ( "Cannot upgrade building: " + buildingName + '\n' );
+//		throw "INVALID OPERATION";
+		return false;
+	}
+	//Get upgrade cost. Need to do this BEFORE submitting build order
+	Resources upgradeCost = this->parentVillage->getBuilding ( buildingName ).getUpgradeCost ();
 	//First submit upgrade order on game server
 	std::string responseJson = this->parentVillage->owner->ownerAccount
 	->upgradeBuilding ( *this->worldSettings->world, this->parentVillage->id, buildingName );
@@ -135,7 +128,6 @@ bool Headquarters::upgradeBuilding ( std::string buildingName ) {
 	// Finding id of created order. It will be the last one found
 	std::regex regId ( "cancel\\((\\d+)" );
 	std::smatch matchId;
-
 	std::string::const_iterator searchStart( buildingOrders.cbegin() );
 	std::string newOrderId;
 	while ( regex_search ( searchStart, buildingOrders.cend(), matchId, regId ) ) {
@@ -149,5 +141,8 @@ bool Headquarters::upgradeBuilding ( std::string buildingName ) {
 	order->cancelSlug = "whatever. need to delete this field";
 	order->text = "Building " + buildingName;
 	this->addOrder ( std::move ( order ) );
+	//Finally if everything went well deduce resources from parent village storage
+	Storage &store = static_cast<Storage&> ( this->parentVillage->getBuilding ("storage") );
+	store.substractResources ( upgradeCost );
 	return true;
 }

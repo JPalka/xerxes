@@ -87,14 +87,16 @@ void Xerxes::runBword() {
 		sleep(5);
 		this->gameInstance->currentWorld->refresh ();
 //		if ( villages[0]->getBuilding ("smith") )
-//		Resources res { 2000, 2000, 2000 };
+//		Resources res { 15000, 15000, 15000 };
 //		try {
 //			storageRef.substractResources ( res );
-//			this->logString ( "Substracted 2k of resources\n" );
+//			this->logString ( "Substracted 15k of resources\n" );
 //		}
 //		catch ( InsufficentResources &ex ) {
 //			this->logString ( "Not enough resources\n" );
 //		}
+		this->logString ( "Upgrading storage\n" );
+		static_cast<Headquarters&> (villages[0]->getBuilding (("main"))).upgradeBuilding ("storage");
 	}
 }
 
