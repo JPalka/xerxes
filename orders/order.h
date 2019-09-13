@@ -8,8 +8,6 @@ class Order {
 	public:
 		int id;
 		long int dueTime;
-		long int startTime;
-		std::string cancelSlug;
 		std::string text; //Text that describes Order in some hooman fashion. Not actually used for anything
 		Order();
 		virtual bool execute () = 0;

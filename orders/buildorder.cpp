@@ -9,11 +9,11 @@ BuildOrder::BuildOrder ( Building &target, Building &source ) : target(target), 
 
 bool BuildOrder::execute () {
 	Game::logCallback ( "Constructed " + this->target.name + " lvl " +
-	std::to_string (this->newLevel) + " in village " + this->source.parentVillage->name);
+	std::to_string (this->target.level+1) + " in village " + this->source.parentVillage->name);
 //	std::cout << "Executing build order " << this->id << ". Constructed " << this->target.name
 //	<< " lvl" << this->newLevel << " in village " << this->source.parentVillage->name << std::endl;
 
-	this->target.setLevel ( this->newLevel );
+	this->target.setLevel ( this->target.level + 1 );
 	return true;
 }
 

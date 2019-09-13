@@ -78,10 +78,9 @@ Headquarters &Headquarters::parseData ( std::string htmlData ) {
 		}
 		//Now create BuildOrder
 		std::unique_ptr<BuildOrder> order ( new BuildOrder ( this->parentVillage->getBuilding (buildingName), *this ) );
-		order->newLevel = levelConstructed;
+//		order->newLevel = levelConstructed;
 		order->dueTime = timestamp;
 		order->id = orderId;
-		order->cancelSlug = cancelLink;
 		order->text = "Building " + buildingName;
 		buildQueueParsed.push_back ( std::move(order) );
 	}
@@ -135,10 +134,8 @@ bool Headquarters::upgradeBuilding ( std::string buildingName ) {
 		searchStart = matchId.suffix().first;
 	}
 	std::unique_ptr<BuildOrder> order ( new BuildOrder ( this->parentVillage->getBuilding (buildingName), *this ) );
-	order->newLevel = ++this->parentVillage->getBuilding (buildingName).level;
 	order->dueTime = Utils::getTimestamp () + secondsComplete;
 	order->id = std::stoi ( newOrderId );
-	order->cancelSlug = "whatever. need to delete this field";
 	order->text = "Building " + buildingName;
 	this->addOrder ( std::move ( order ) );
 	//Finally if everything went well deduce resources from parent village storage

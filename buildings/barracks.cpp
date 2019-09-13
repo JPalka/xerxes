@@ -103,7 +103,6 @@ Barracks &Barracks::parseData ( std::string htmlData ) {
 			std::unique_ptr<RecruitOrder> order ( new RecruitOrder ( *placeRef.getUnit ( unitType ), *this ) );
 			order->dueTime = timestamp - i * this->getRecruitTime ( unitType );
 			order->id = orderId;
-			order->cancelSlug = cancelLink;
 			order->text = "Recruiting " + unitType;
 			this->addOrder ( std::move(order) );
 		}
@@ -189,7 +188,6 @@ Barracks &Barracks::parseData ( std::string htmlData ) {
 			std::unique_ptr<RecruitOrder> order ( new RecruitOrder ( *placeRef.getUnit ( unitType ), *this ) );
 			order->dueTime = timestamp - i * this->getRecruitTime ( unitType );
 			order->id = orderId;
-			order->cancelSlug = cancelLink;
 			order->text = "Recruiting " + unitType;
 			this->addOrder ( std::move(order) );
 		}
@@ -220,7 +218,6 @@ bool Barracks::recruitUnit ( std::string unitName, int count ) {
 		std::unique_ptr<RecruitOrder> order ( new RecruitOrder ( *placeRef.getUnit ( unitName ), *this ) );
 		order->dueTime = Utils::getTimestamp () + (i+1) * this->getRecruitTime ( unitName );
 		order->id = orderId;
-		order->cancelSlug = "Whatever Im not using it anyway";
 		order->text = "Recruiting " + unitName;
 		this->addOrder ( std::move(order) );
 	}

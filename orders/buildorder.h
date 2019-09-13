@@ -8,9 +8,7 @@ class Village;
 class BuildOrder : public Order
 {
 	public:
-//		std::string buildingName;
-		int newLevel;
-//		int villageId;
+		Resources cost; // resources spent on construction
 		Building &target; // Building being upgraded
 		Building &source; // In case of build order source is HQ building that places order
 		BuildOrder ( Building &target, Building &source );
