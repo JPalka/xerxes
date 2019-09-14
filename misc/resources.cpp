@@ -7,8 +7,15 @@ Resources &Resources::operator- ( const Resources &rhs ) {
 	this->iron -= rhs.iron;
 	return *this;
 }
-
+//TODO: change it to return new Resources object
 Resources &Resources::operator+ ( const Resources &rhs ) {
+	this->wood += rhs.wood;
+	this->stone += rhs.stone;
+	this->iron += rhs.iron;
+	return *this;
+}
+
+Resources &Resources::operator+= ( const Resources &rhs ) {
 	this->wood += rhs.wood;
 	this->stone += rhs.stone;
 	this->iron += rhs.iron;

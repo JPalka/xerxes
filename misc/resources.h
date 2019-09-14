@@ -14,6 +14,7 @@ class Resources
 		float ironIncome;
 		Resources &operator- ( const Resources &rhs );
 		Resources &operator+ ( const Resources &rhs );
+		Resources &operator+= ( const Resources &rhs );
 		bool operator== ( const Resources &rhs );
 		bool operator>= ( const Resources &rhs );
 		bool operator> ( const Resources &rhs );

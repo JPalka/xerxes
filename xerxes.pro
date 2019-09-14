@@ -94,7 +94,8 @@ SOURCES += main.cpp \
     orders/scavengeorder.cpp \
     xerxes/xerxes.cpp \
     xerxes/ui.cpp \
-    game/orderprocessor.cpp
+    game/orderprocessor.cpp \
+    misc/army.cpp
 
 
 HEADERS += \
@@ -160,4 +161,5 @@ HEADERS += \
     exceptions/worldinactive.h \
     game/orderprocessor.h \
     exceptions/insufficentunits.h \
-    exceptions/insufficentresources.h
+    exceptions/insufficentresources.h \
+    misc/army.h

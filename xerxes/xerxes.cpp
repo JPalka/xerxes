@@ -9,6 +9,7 @@
 #include <exceptions/wrongcredentials.h>
 #include <exceptions/worldinactive.h>
 #include <exceptions/insufficentresources.h>
+#include "misc/army.h"
 
 Xerxes::Xerxes() {
 	this->logFile.open ("xerxes.log");
@@ -80,11 +81,16 @@ void Xerxes::runBword() {
 	//MAIN B-WORD LOOP THAT WILL PERFORM ACTIONS AND WHATNOTS
 	Player *player = this->gameInstance->currentWorld->findPlayer ( this->gameInstance->activeAccount.playerId );
 	std::vector <Village*> villages = this->gameInstance->currentWorld->findVillages ( *player );
-	std::vector<std::pair<std::string, int>> scavengeParty;
-	scavengeParty.push_back ( std::make_pair("spear", 100) );
-	Storage &storageRef = static_cast<Storage&> (villages[0]->getBuilding ("storage"));
+	//Test creation of army
+	Army testArmy;
+	testArmy.setHome ( villages[0] );
+	testArmy.addUnit ( "spear", 20 );
+	testArmy.addUnit ( "sword", 10 );
+//	Storage &storageRef = static_cast<Storage&> (villages[0]->getBuilding ("storage"));
 	while ( !this->stopSignal ) {
 		sleep(5);
+		this->logString ( "Army stats: \n" );
+		this->logString ( testArmy.toString () );
 		this->gameInstance->currentWorld->refresh ();
 //		if ( villages[0]->getBuilding ("smith") )
 //		Resources res { 15000, 15000, 15000 };
@@ -95,8 +101,8 @@ void Xerxes::runBword() {
 //		catch ( InsufficentResources &ex ) {
 //			this->logString ( "Not enough resources\n" );
 //		}
-		this->logString ( "Upgrading storage\n" );
-		static_cast<Headquarters&> (villages[0]->getBuilding (("main"))).upgradeBuilding ("storage");
+//		this->logString ( "Upgrading storage\n" );
+//		static_cast<Headquarters&> (villages[0]->getBuilding (("main"))).upgradeBuilding ("storage");
 	}
 }
 
